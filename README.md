@@ -1,7 +1,7 @@
 # paitum_api
-##วิธีรัน
+## วิธีรัน
 
-เพิ่มไฟล์ ```scret.json``` โดยข้างในมี
+### เพิ่มไฟล์ ```scret.json``` โดยข้างในมี
 ```
   {
     "user": database_username,
@@ -14,13 +14,12 @@
 รัน 
 ```npm start```
 
-หรือถ้าไม่มี db 
-เพิ่มไฟล์ ```scret.json``` โดยข้างในมี
+### หรือถ้าไม่มี db เพิ่มไฟล์ ```scret.json``` โดยข้างในมี
 ```
   {
       "user": "postgres",
       "password": "1234",
-      "host": "127.0.0.1",
+      "host": "db",
       "port": "5432",
       "database": "paitum"
   }
