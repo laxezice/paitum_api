@@ -46,5 +46,35 @@ module.exports = function (fastify, {}, done) {
     { schema: resSchema.likeSchema },
     resController.unlike
   );
+
+  fastify.post(
+    "/coupon",
+    { schema: resSchema.couponSchema },
+    resController.addCoupon
+  );
+
+  fastify.get(
+    "/coupon/:restaurantId",
+    { schema: resSchema.getPromotionSchema },
+    resController.getCoupon
+  );
+
+  fastify.post(
+    "/promotion",
+    { schema: resSchema.promotionSchema },
+    resController.addPromotion
+  );
+
+  fastify.get(
+    "/promotion/:restaurantId",
+    { schema: resSchema.getPromotionSchema },
+    resController.getPromotion
+  );
+
+  fastify.put(
+    "/redeem",
+    { schema: resSchema.redeemSchema },
+    resController.redeem
+  );
   done();
 };

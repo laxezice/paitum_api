@@ -96,12 +96,13 @@ module.exports = {
   promotionSchema: {
     body: {
       type: "object",
-      required: ["name", "exp", "description"],
+      required: ["name", "exp", "description", "restaurantId"],
       properties: {
         name: { type: "string" },
         exp: { type: "string", format: "date-time" },
         image: { type: "string" },
         description: { type: "string" },
+        restaurantId: { type: "number" },
       },
     },
   },
@@ -109,12 +110,22 @@ module.exports = {
   couponSchema: {
     body: {
       type: "object",
-      required: ["name", "exp", "description"],
+      required: [
+        "name",
+        "exp",
+        "description",
+        "restaurantId",
+        "coin",
+        "quantity",
+      ],
       properties: {
         name: { type: "string" },
         exp: { type: "string", format: "date-time" },
         image: { type: "string" },
         description: { type: "string" },
+        coin: { type: "number" },
+        quantity: { type: "number" },
+        restaurantId: { type: "number" },
       },
     },
   },
@@ -124,10 +135,18 @@ module.exports = {
       type: "object",
       required: ["userId", "couponId"],
       properties: {
-        name: { type: "string" },
-        exp: { type: "string", format: "date-time" },
-        image: { type: "string" },
-        description: { type: "string" },
+        userId: { type: "number" },
+        couponId: { type: "number" },
+      },
+    },
+  },
+
+  getPromotionSchema: {
+    params: {
+      type: "object",
+      required: ["restaurantId"],
+      properties: {
+        restaurantId: { type: "number" },
       },
     },
   },

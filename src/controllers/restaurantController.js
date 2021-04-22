@@ -4,9 +4,11 @@ const {
   Review,
   Comment,
   ReviewIamge,
+  Promotion,
+  Coupon,
 } = require("../models/ModelIntaillize");
 const { Sequelize } = require("../configs/dbconfig");
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
 module.exports = {
   getAll: async (request, reply) => {
     let restautants = await Restaurant.findAll({
@@ -93,19 +95,34 @@ module.exports = {
     let review = await Review.create(data, {
       include: { model: ReviewIamge, as: "images" },
     });
-
+    let user = await User.findByPk(data.userId);
     let restaurant = await Restaurant.findOne({
       where: {
         id: data.restaurantId,
       },
       include: ["userReviews"],
     });
+
+    //cal coin
+    let r = restaurant.userReviews.length;
+    let getCoin = 20;
+    if (restaurant.coin < 20) {
+      getCoin = restaurant.coin;
+      restaurant.coin = 0;
+    } else {
+      restaurant.coin = restaurant.coin - 20;
+    }
+    getCoin += Math.ceil(1000 / (r * 10));
+    user.coin += getCoin;
+
     star = 0;
     // cal star
     for (let i = 0; i < restaurant.userReviews.length; i++) {
       star += restaurant.userReviews[i].star;
     }
     restaurant.star = star / restaurant.userReviews.length;
+
+    await user.save();
     await restaurant.save();
     return {
       status: 201,
@@ -202,16 +219,103 @@ module.exports = {
         },
       ],
     });
-    return { review: review };
+    return { status: 201, message: "add success", review: review };
   },
 
   addPromotion: async (request, reply) => {
-    return { review: review };
+    const data = request.body;
+    let promotion = await Promotion.build(data);
+    await promotion.save(data);
+    return {
+      status: 201,
+      message: "add success",
+      promotion: promotion.dataValues,
+    };
   },
+
+  getPromotion: async (request, reply) => {
+    let promotions = await Promotion.findAll({
+      where: {
+        restaurantId: request.params.restaurantId,
+      },
+    });
+    return {
+      status: 200,
+      message: "get success",
+      promotion: promotions,
+    };
+  },
+
   addCoupon: async (request, reply) => {
-    return { review: review };
+    const data = request.body;
+    let coupon = await Coupon.build(data);
+    await coupon.save(data);
+    return {
+      status: 201,
+      message: "add success",
+      promotion: coupon.dataValues,
+    };
   },
+
+  getCoupon: async (request, reply) => {
+    let coupons = await Coupon.findAll({
+      where: {
+        restaurantId: request.params.restaurantId,
+      },
+    });
+    return {
+      status: 200,
+      message: "get success",
+      coupons: coupons,
+    };
+  },
+
   redeem: async (request, reply) => {
-    return { review: review };
+    const data = request.body;
+    const coupon = await Coupon.findByPk(data.couponId);
+    if (coupon.quantity > 0) {
+      const user = await User.findOne({
+        where: {
+          id: data.userId,
+        },
+        include: [
+          {
+            model: Coupon,
+            as: "coupons",
+          },
+        ],
+      });
+
+      let have = user.coupons.some(function (coupon) {
+        return coupon.id == data.couponId;
+      });
+      if (have) {
+        return {
+          status: 400,
+          message: "already redeem",
+        };
+      }
+
+      if (user.coin >= coupon.coin) {
+        user.coin -= coupon.coin;
+        coupon.quantity -= 1;
+        await user.addCoupons(coupon);
+        await user.save();
+        await coupon.save();
+        return {
+          status: 201,
+          message: "redeem success",
+        };
+      } else {
+        return {
+          status: 400,
+          message: "coin not enough",
+        };
+      }
+    }
+    return {
+      status: 400,
+      message: "coupon is emty",
+    };
   },
 };

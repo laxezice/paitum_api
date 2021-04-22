@@ -1,4 +1,4 @@
-const { User } = require("../models/ModelIntaillize");
+const { User, Coupon } = require("../models/ModelIntaillize");
 module.exports = {
   getAll: async (request, reply) => {
     let users = await User.findAll({
@@ -66,7 +66,7 @@ module.exports = {
   profile: async (request, reply) => {
     let user = await User.findByPk(request.query.userId, {
       attributes: { exclude: ["password"] },
-      include: ["following", "follower"],
+      include: ["following", "follower", "coupons"],
     });
     return {
       status: 200,
